@@ -8,8 +8,8 @@
 
 L’ANOVA non paramétrique désigne un ensemble de méthodes statistiques permettant de comparer plus de deux groupes indépendants ou liés, sans supposer la normalité des données ni l’homogénéité des variances. Ces tests s’appuient généralement sur les rangs des données, offrant une alternative robuste à l’ANOVA paramétrique lorsque ses conditions ne sont pas respectées.
 
-([ Page descriptive ici](https://meddatamuse.github.io/non_parametric_anova/))
----
+[ Page descriptive ici](https://meddatamuse.github.io/non_parametric_anova/)
+
 
 ## Pourquoi Choisir le Non Paramétrique ?
 
