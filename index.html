@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographie : L'ANOVA Non Paramétrique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- 
+    Palette Name: Brilliant Blues (selected for vibrancy)
+    HEX Codes: #005F73 (Dark Teal), #0A9396 (Teal), #94D2BD (Light Teal), #EE9B00 (Orange), #CA6702 (Burnt Orange)
+    -->
+    <!-- 
+    Narrative Plan:
+    1.  Introduction: Define non-parametric ANOVA.
+    2.  Why Non-Parametric?: Explain reasons with a conceptual distribution chart.
+    3.  Key Tests: Detail Kruskal-Wallis and Friedman tests with a comparison table.
+    4.  Advantages/Disadvantages: Summarize pros and cons.
+    5.  Decision Tree: Simple flowchart for test selection.
+    6.  Conclusion: Reiterate importance.
+    -->
+    <!-- 
+    Visualization Choices (NO SVG, NO MERMAID):
+    -   Data Distribution: Bar Chart (Chart.js Canvas). Goal: Inform. Confirmed: NO SVG.
+    -   Test Comparison: HTML Table. Goal: Compare. Confirmed: NO SVG, NO MERMAID.
+    -   Advantages/Disadvantages: Styled HTML lists with Unicode icons. Goal: Inform. Confirmed: NO SVG, NO MERMAID.
+    -   Decision Flowchart: Structured HTML/CSS. Goal: Organize. Confirmed: NO SVG, NO MERMAID.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F4F8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flowchart-arrow {
+            color: #0A9396;
+            font-weight: bold;
+            font-size: 2.5rem; /* Larger for visibility */
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center my-8 md:my-16">
+            <h1 class="text-5xl md:text-7xl font-black text-[#005F73] tracking-tight">L'ANOVA Non Paramétrique</h1>
+            <p class="text-xl md:text-2xl mt-4 text-[#0A9396]">Comparer des Groupes sans Distribution Normale</p>
+        </header>
+
+        <section class="mb-16">
+            <div class="text-center max-w-4xl mx-auto mb-12">
+                <h2 class="text-3xl font-bold text-[#005F73] mb-4">Qu'est-ce que l'ANOVA Non Paramétrique ?</h2>
+                <p class="text-lg text-gray-700">
+                    L'Analyse de Variance (ANOVA) Non Paramétrique est un ensemble de méthodes statistiques utilisées pour comparer plus de deux groupes indépendants ou liés, sans nécessiter d'hypothèses strictes sur la distribution normale des données ou l'homogénéité des variances. Ces tests se basent souvent sur les rangs des données plutôt que sur leurs valeurs brutes, offrant une alternative robuste lorsque les conditions de l'ANOVA paramétrique ne sont pas remplies.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <h3 class="text-2xl font-bold text-[#0A9396] mb-6 text-center">Pourquoi Choisir le Non Paramétrique ?</h3>
+                <p class="text-center text-gray-700 mb-8 max-w-4xl mx-auto">
+                    Les tests non paramétriques sont privilégiés dans des situations spécifiques où les données ne répondent pas aux exigences des tests paramétriques, comme l'ANOVA traditionnelle. Le graphique ci-dessous illustre conceptuellement une distribution normale (idéale pour l'ANOVA) par rapport à une distribution asymétrique, pour laquelle un test non paramétrique serait plus approprié.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="distributionComparisonChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start bg-[#94D2BD] bg-opacity-30 p-4 rounded-lg shadow-sm">
+                            <span class="text-2xl text-[#005F73] mr-4">📉</span>
+                            <div>
+                                <h4 class="font-bold text-xl text-[#005F73]">Données Non Normales</h4>
+                                <p class="text-gray-700">La distribution des données s'écarte significativement de la normalité.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-[#94D2BD] bg-opacity-30 p-4 rounded-lg shadow-sm">
+                            <span class="text-2xl text-[#005F73] mr-4">🔢</span>
+                            <div>
+                                <h4 class="font-bold text-xl text-[#005F73]">Données Ordinales ou Classées</h4>
+                                <p class="text-gray-700">Lorsque les données sont des rangs ou des catégories ordonnées.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-[#94D2BD] bg-opacity-30 p-4 rounded-lg shadow-sm">
+                            <span class="text-2xl text-[#005F73] mr-4">🤏</span>
+                            <div>
+                                <h4 class="font-bold text-xl text-[#005F73]">Petits Échantillons</h4>
+                                <p class="text-gray-700">Le théorème central limite ne s'applique pas toujours pour des petits N.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-[#94D2BD] bg-opacity-30 p-4 rounded-lg shadow-sm">
+                            <span class="text-2xl text-[#005F73] mr-4">💎</span>
+                            <div>
+                                <h4 class="font-bold text-xl text-[#005F73]">Présence de Valeurs Aberrantes</h4>
+                                <p class="text-gray-700">Les tests non paramétriques sont moins sensibles aux outliers.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center text-[#005F73] mb-8">Les Tests Clés : Kruskal-Wallis et Friedman</h2>
+            <p class="text-center text-lg text-gray-700 max-w-4xl mx-auto mb-8">
+                Deux des tests non paramétriques les plus couramment utilisés en remplacement de l'ANOVA sont le test de Kruskal-Wallis (pour les groupes indépendants) et le test de Friedman (pour les mesures répétées ou groupes liés).
+            </p>
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg">
+                        <thead>
+                            <tr class="bg-[#0A9396] text-white">
+                                <th class="py-3 px-4 text-left text-lg">Caractéristique</th>
+                                <th class="py-3 px-4 text-left text-lg">Test de Kruskal-Wallis H</th>
+                                <th class="py-3 px-4 text-left text-lg">Test de Friedman</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-3 px-4 border-b border-gray-200 font-semibold text-[#005F73]">Objectif</td>
+                                <td class="py-3 px-4 border-b border-gray-200">Comparer 2 groupes indépendants ou plus</td>
+                                <td class="py-3 px-4 border-b border-gray-200">Comparer 3 groupes liés ou plus (mesures répétées)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 border-b border-gray-200 font-semibold text-[#005F73]">Analogue Paramétrique</td>
+                                <td class="py-3 px-4 border-b border-gray-200">ANOVA unidirectionnelle</td>
+                                <td class="py-3 px-4 border-b border-gray-200">ANOVA à mesures répétées</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 border-b border-gray-200 font-semibold text-[#005F73]">Type de Données</td>
+                                <td class="py-3 px-4 border-b border-gray-200">Continu ou ordinal</td>
+                                <td class="py-3 px-4 border-b border-gray-200">Continu ou ordinal</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 border-b border-gray-200 font-semibold text-[#005F73]">Principe</td>
+                                <td class="py-3 px-4 border-b border-gray-200">Classe tous les points de données ensemble, puis somme les rangs par groupe.</td>
+                                <td class="py-3 px-4 border-b border-gray-200">Classe les données à l'intérieur de chaque "bloc" (sujet), puis compare les rangs.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center text-[#005F73] mb-8">Avantages et Inconvénients</h2>
+            <p class="text-center text-lg text-gray-700 max-w-4xl mx-auto mb-8">
+                Comme tout outil statistique, les tests non paramétriques ont leurs forces et leurs limites.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="text-xl font-bold text-[#0A9396] mb-3">Avantages ✔️</h3>
+                    <ul class="list-none space-y-2">
+                        <li class="flex items-start"><span class="text-2xl text-[#0A9396] mr-3">✔</span> <div>**Robustesse :** Peu affectés par les outliers et l'absence de normalité.</div></li>
+                        <li class="flex items-start"><span class="text-2xl text-[#0A9396] mr-3">✔</span> <div>**Flexibilité :** Utilisables avec des données ordinales ou nominales, ainsi que des échantillons de petite taille.</div></li>
+                        <li class="flex items-start"><span class="text-2xl text-[#0A9396] mr-3">✔</span> <div>**Moins d'hypothèses :** Ne nécessitent pas de suppositions strictes sur la distribution des données.</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="text-xl font-bold text-[#CA6702] mb-3">Inconvénients ❌</h3>
+                    <ul class="list-none space-y-2">
+                        <li class="flex items-start"><span class="text-2xl text-[#CA6702] mr-3">❌</span> <div>**Moins de puissance :** Moins susceptibles de détecter une vraie différence si les hypothèses paramétriques sont respectées.</div></li>
+                        <li class="flex items-start"><span class="text-2xl text-[#CA6702] mr-3">❌</span> <div>**Informations limitées :** Ne fournissent pas d'estimations directes des moyennes ou des interactions complexes.</div></li>
+                        <li class="flex items-start"><span class="text-2xl text-[#CA6702] mr-3">❌</span> <div>**Interprétation :** Les résultats basés sur les rangs peuvent être moins intuitifs à interpréter que ceux basés sur les moyennes.</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16 bg-white rounded-lg shadow-xl p-8">
+            <h2 class="text-3xl font-bold text-center text-[#005F73] mb-8">Comment Choisir ? Un Arbre de Décision Simplifié</h2>
+            <p class="text-center text-lg text-gray-700 max-w-4xl mx-auto mb-8">
+                Ce schéma vous aide à naviguer rapidement vers le test non paramétrique approprié pour comparer vos groupes.
+            </p>
+            <div class="flex flex-col items-center space-y-6">
+                <div class="bg-[#0A9396] text-white p-4 rounded-lg shadow-md font-bold text-lg text-center w-64">
+                    Comparer 2+ Groupes ?
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="bg-white border-2 border-[#0A9396] p-4 rounded-lg shadow-md text-center w-80">
+                    <p class="font-bold text-[#005F73]">Données Normalement Distribuées / Paramétriques ?</p>
+                    <div class="flex justify-around mt-4">
+                        <div class="text-[#0A9396] font-semibold">Oui (➡️ ANOVA Paramétrique)</div>
+                        <div class="text-[#EE9B00] font-semibold">Non (➡️ Non Paramétrique)</div>
+                    </div>
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="bg-white border-2 border-[#0A9396] p-4 rounded-lg shadow-md text-center w-80">
+                    <p class="font-bold text-[#005F73]">Groupes Indépendants ou Liés ?</p>
+                    <div class="flex justify-around mt-4">
+                        <div class="text-[#0A9396] font-semibold">Indépendants (⬇️ Kruskal-Wallis)</div>
+                        <div class="text-[#EE9B00] font-semibold">Liés (⬇️ Friedman)</div>
+                    </div>
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-2xl">
+                    <div class="bg-[#94D2BD] text-[#005F73] p-4 rounded-lg shadow-md font-bold text-lg text-center">
+                        Test de Kruskal-Wallis
+                    </div>
+                    <div class="bg-[#94D2BD] text-[#005F73] p-4 rounded-lg shadow-md font-bold text-lg text-center">
+                        Test de Friedman
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center py-8 border-t border-gray-300">
+            <p class="text-lg font-bold text-[#005F73]">L'ANOVA Non Paramétrique : Un outil essentiel pour une analyse statistique robuste.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + ' ' + words[i]).length > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine += ' ' + words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+        
+        const sharedTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const distChartCtx = document.getElementById('distributionComparisonChart').getContext('2d');
+        const distributionComparisonChart = new Chart(distChartCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Valeurs Basses', 'Valeurs Moyennes', 'Valeurs Élevées'],
+                datasets: [
+                    {
+                        label: 'Distribution Normale',
+                        data: [20, 80, 20],
+                        backgroundColor: '#0A9396',
+                        borderColor: '#0A9396',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Distribution Asymétrique',
+                        data: [60, 30, 10],
+                        backgroundColor: '#EE9B00',
+                        borderColor: '#EE9B00',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                ...sharedTooltipOptions,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        display: false,
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    ...sharedTooltipOptions.plugins,
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
