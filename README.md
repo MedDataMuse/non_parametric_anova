@@ -36,4 +36,4 @@ L’ANOVA non paramétrique désigne un ensemble de méthodes statistiques perme
 
 ---
 
-Ce résumé capte la structure, les points principaux et l’esprit didactique de l’infographie originale, tout en restant lisible et synthétique au format Markdown.
+
